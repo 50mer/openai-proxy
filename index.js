@@ -1,42 +1,54 @@
 const express = require('express');
 const cors = require('cors');
-const fetch = require('node-fetch');
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+const port = process.env.PORT || 10000;
+
+// Enable CORS for all origins
+app.use(cors({
+  origin: '*', // For development, you can use '*'. For production, specify your domains
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
-// Simple endpoint to check if server is running
-app.get('/', (req, res) => {
-  res.send('Server is running!');
-});
-
-// Your OpenAI API endpoint
+// Proxy endpoint for OpenAI API
 app.post('/api/openai', async (req, res) => {
   try {
-    console.log('Received request:', JSON.stringify(req.body).slice(0, 200) + '...');
+    console.log('Received request:', JSON.stringify(req.body).substring(0, 200) + '...');
     
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', req.body, {
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify(req.body)
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
     });
     
-    const data = await response.json();
     console.log('OpenAI response status:', response.status);
     
-    res.json(data);
+    res.json(response.data);
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Failed to process request' });
+    console.error('Error calling OpenAI API:', error.message);
+    
+    if (error.response) {
+      console.error('OpenAI API error status:', error.response.status);
+      console.error('OpenAI API error data:', error.response.data);
+      
+      res.status(error.response.status).json(error.response.data);
+    } else {
+      res.status(500).json({ error: { message: error.message } });
+    }
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Simple health check endpoint
+app.get('/', (req, res) => {
+  res.send('OpenAI proxy is running');
+});
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
