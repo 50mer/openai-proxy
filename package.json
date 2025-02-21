@@ -1,15 +1,35 @@
 {
   "name": "openai-proxy",
   "version": "1.0.0",
-  "description": "Simple proxy for OpenAI API",
+  "description": "Proxy server for OpenAI API",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "axios": "^1.6.2",
     "cors": "^2.8.5",
-    "node-fetch": "^2.6.9",
-    "dotenv": "^16.0.3"
-  }
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https:/github.com/50mer/openai-proxy.git"
+  },
+  "keywords": [
+    "openai",
+    "api",
+    "proxy",
+    "express"
+  ],
+  "author": "Sommer H",
+  "license": "MIT"
 }
